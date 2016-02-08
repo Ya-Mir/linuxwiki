@@ -1,0 +1,13 @@
+
+#eem example
+
+event manager applet OSPFUP 
+ event syslog pattern "OSPF-5-ADJCHG.*to FULL"
+ action 100 info type routername
+ action 120 cli command "show ip ospf neighbor"
+ action 200 mail server "95.215.68.xx" to "eng@city-line.org" from "zabbix@city-line.org" subject "ospf neighbor  UP" body "$_cli_result"
+event manager applet OSPFDOWN 
+ event syslog pattern "OSPF-5-ADJCHG.*FULL to *"
+ action 100 info type routername
+ action 120 cli command "show ip ospf neighbor"
+ action 200 mail server "95.215.68.xx" to "eng@city-line.org" from "zabbix@city-line.org" subject "ospf neighbor DOWN" body "$_cli_result
