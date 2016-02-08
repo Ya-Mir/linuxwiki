@@ -1,0 +1,48 @@
+Еще кстати если траффика много и юзаете шейперы и прочие потребители таймеров - КРАЙНЕ желательно наличие TSC как таймера.
+Проверять тут
+/sys/devices/system/clocksource/clocksource0/current_clocksource
+
+
+для отлаживание того, что жрет процессор
+http://oprofile.sourceforge.net/news/
+
+тюнинг ip route кэша
+http://vincent.bernat.im/en/blog/2011-ipv4-route-cache-linux.html
+
+
+посмотреть кол-во коннектов 
+cat /proc/net/ip_conntrack | grep ESTAB |  awk '{print $5}' | sort |  uniq -c | sort -nr | less
+
+
+http://forum.nag.ru/forum/index.php?showtopic=70413&st=20:
+ограничение кол-ва соединений 
+
+1 вариант:
+-A FORWARD -s 172.16.0.0/12 -p udp -m state --state NEW -m recent --set --name UDPFLOOD --rsource
+-A FORWARD -s 172.16.0.0/12 -p udp -m state --state NEW -m recent --update --seconds 10 --hitcount 200 --name UDPFLOOD --rsource -j DROP
+
+-A FORWARD -s 172.16.0.0/12  -p tcp -m state --state NEW --dport 1024:65535 -m recent --set --name TCPFLOOD --rsource
+-A FORWARD -s 172.16.0.0/12  -p tcp -m state --state NEW --dport 1024:65535 -m recent --update --seconds 10 --hitcount 200 --name TCPFLOOD --rsource -j DROP
+
+Нет, дропать все последующие udp пакеты на новые destination (host:port) если их кол-во превышает 200 за прошедшие 10 секунд. Поскольку понятия "сессия" для UDP нет, а "сессия" коннтрака "открывается" по факту при прохождении пакета с неведомыми ранее source и destination ip:mac, соответственно "оканчивается" по тайм-ауту простоя "соединения".
+
+ man iptables, /recent
+
+модуль загружал с такими параметрами
+
+options xt_recent ip_pkt_list_tot=255 ip_list_tot=5000
+
+
+2 вариант:
+iptables -I INPUT -p tcp --dport 80 -m connlimit --connlimit-above 1 -j REJECT
+
+3 вариант:
+CONNS=20
+$IPT -N NEWCONNLIMITUDP
+$IPT -A NEWCONNLIMITUDP -m hashlimit --hashlimit ${CONNS}/sec --hashlimit-burst ${CONNS} --hashlimit-mode srcip --hashlimit-name connlimit_udp -j RETURN
+$IPT -A NEWCONNLIMITUDP -j DROP
+$IPT -N NEWCONNLIMITTCP
+$IPT -A NEWCONNLIMITTCP -m hashlimit --hashlimit ${CONNS}/sec --hashlimit-burst ${CONNS} --hashlimit-mode srcip --hashlimit-name connlimit_tcp -j RETURN
+$IPT -A NEWCONNLIMITTCP -j DROP
+$IPT -A FORWARD -i ppp+ -p udp -m state --state NEW -j NEWCONNLIMITUDP
+$IPT -A FORWARD -i ppp+ -p tcp --dport 1024:65535 -m state --state NEW -j NEWCONNLIMITTC
