@@ -1,3 +1,30 @@
 для отлаживание того, что жрет процессор
 http://oprofile.sourceforge.net/news/
 
+
+GRUB_CMDLINE_LINUX="crashkernel=256M nmi_watchdog=1 no_console_suspend=1 intel_idle.max_cstate=0 processor.max_cstate=1 noht"
+
+
+
+
+After struggling with ondemand for a while, I will share how to permanently disable it in Ubuntu and its derivates.
+
+Install cpufrequtils:
+
+sudo apt-get install cpufrequtils
+Then edit the following file (if it doesn't exist, create it):
+
+sudo nano /etc/default/cpufrequtils
+And add the following line to it:
+
+GOVERNOR="performance"
+Save and exit.
+
+Now you need to disable ondemand daemon, otherwise after you reboot the settings will be overwritten.
+
+sudo update-rc.d ondemand disable
+And you are done!
+
+You can check your settings with:
+
+cpufreq-info

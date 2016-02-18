@@ -1,0 +1,11 @@
+#default package:
+zabbix-agent
+fail2ban
+rsyslog
+openssh-blacklist
+openssh-blacklist-extra
+mc
+htop
+logrotate
+rkhunter
+molly-guard
