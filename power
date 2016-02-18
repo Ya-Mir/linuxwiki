@@ -1,0 +1,14 @@
+Well, one thing you could do is simply disable the power button altogether. Personally, I only use it to turn on my machine, and never use it once the machine is on. If this is an OK solution for you, edit /etc/acpi/events/powerbtn-acpi-support:
+
+sudo nano /etc/acpi/events/powerbtn-acpi-support
+That file should look something like this:
+
+event=button[ /]power
+action=/etc/acpi/powerbtn-acpi-support.sh
+To make the power button do nothing, change it to:
+
+event=button[ /]power
+action=
+Then restart the acpi daemon with
+
+sudo service acpid restart
