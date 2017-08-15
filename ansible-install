@@ -1,0 +1,10 @@
+ #ставим питон, если его нет 
+ sudo apt-get install python-dev
+ sudo apt-get install python-virtualenv
+ sudo apt-get install python-pip
+ sudo apt-get install libffi-dev
+ 
+ sudo pip install --upgrade cffi
+ sudo pip install markupsafe 
+ pip install ansible==1.9.6.0 --user
+
