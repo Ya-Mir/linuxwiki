@@ -1,0 +1,25 @@
+#Передача данных между модулями Си без глобальных переменных
+/* isr.h */
+typedef struct
+{
+int a;
+int b
+} struct_data;/* тип структуры объявлен как глобальный в *.h файле */
+
+/* isr.c */
+static struct_data data;
+
+struct_data *get_data_pointer(void) /* глобальная функция */
+{
+return &data;
+}
+
+и уже в любом другом модуле, где мне нужно получить доступ к данным, делать так:
+/* модуль process.c */
+void func(void)
+{
+struct_data *data = get_data_pointer();
+
+process_a(data->a);/* обработка данных */
+process_b(data->b);/* обработка данных */
+}
